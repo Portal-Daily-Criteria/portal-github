@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Portal do Assessor</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* Entrada do Portal do Assessor (site público, sem dados). Os dados de cada assessor estão na pasta d, trancados
+     (AES-256-GCM); a chave de cada um está no chaveiro da pessoa (pasta k), trancado com a senha dela. */
+  :root{--font:'Montserrat',Arial,sans-serif;--bg:#F4F6F9;--card:#FFFFFF;--line:#DCE2EA;--text:#0F1B2D;--muted:#5B6878;--pri:#003662;--pri-h:#0B4A80;--err:#B42318;--ok:#1F7A4D;--inp:#FFFFFF}
+  @media (prefers-color-scheme: dark){ :root{--bg:#0D1520;--card:#131E2C;--line:#26354A;--text:#E8EEF6;--muted:#9AA8BA;--pri:#4A90D9;--pri-h:#6AA6E4;--err:#F28B82;--ok:#7CC9A0;--inp:#0D1520} .logo.cl{display:none} .logo.es{display:block} }
+  html,body{margin:0;min-height:100%;background:var(--bg);font-family:var(--font);color:var(--text)}
+  body{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:16px;box-sizing:border-box}
+  .card{width:400px;max-width:100%;background:var(--card);border:0.8px solid var(--line);border-radius:10px;padding:28px 28px 22px;box-sizing:border-box}
+  .logo{height:30px;width:auto;display:block;margin-bottom:18px} .logo.es{display:none}
+  .t{font-size:17px;font-weight:700}
+  .tag{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--pri);border:0.8px solid var(--pri);border-radius:6px;padding:2px 6px;margin-left:6px;vertical-align:2px}
+  .s{font-size:12px;color:var(--muted);margin:6px 0 18px;line-height:1.55}
+  .f{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+  .f label{font-size:11px;font-weight:600;color:var(--muted)}
+  .f input{border:0.8px solid var(--line);border-radius:8px;padding:10px 12px;font-size:14px;font-family:var(--font);background:var(--inp);color:var(--text);outline:none}
+  .f input:focus{border-color:var(--pri);box-shadow:0 0 0 3px rgba(3,98,194,.15)}
+  .btn{appearance:none;width:100%;border:none;border-radius:8px;background:var(--pri);color:#fff;font-family:var(--font);font-size:13.5px;font-weight:600;padding:11px;cursor:pointer;margin-top:4px}
+  .btn:hover{background:var(--pri-h)} .btn[disabled]{opacity:.55;cursor:wait}
+  .btn:focus-visible,.lnk:focus-visible{outline:2px solid var(--pri);outline-offset:2px}
+  .lnk{appearance:none;background:none;border:none;color:var(--muted);font-family:var(--font);font-size:11.5px;cursor:pointer;margin-top:12px;text-decoration:underline;padding:0}
+  .msg{font-size:12px;font-weight:600;min-height:18px;margin-top:10px;color:var(--ok)}
+  .msg.err{color:var(--err)}
+  .foot{font-size:11px;color:var(--muted);margin-top:16px;line-height:1.55;border-top:0.8px solid var(--line);padding-top:12px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <svg role="img" aria-label="Criteria" class="logo cl" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 167 37" fill="none">
+<path
+        d="M40.6334 36.4859V11.5106H44.2803V17.2153C45.6668 13.4129 48.6985 10.9976 52.6535 10.9976C53.4238 10.9976 54.1941 11.1517 54.5033 11.3576V14.9541C53.9377 14.8 53.065 14.6976 52.3454 14.6976C47.8248 14.6976 44.486 18.5 44.486 23.6906V36.4859H40.6334Z"
+        fill="#1B2634"
+      />
+      <path
+        d="M58.6123 2.56942C58.6123 1.18231 59.6401 0.154123 61.0784 0.154123C62.4649 0.154123 63.4927 1.18231 63.4927 2.56942C63.4927 3.95652 62.4649 4.98471 61.0784 4.98471C59.639 4.98471 58.6123 3.95652 58.6123 2.56942ZM59.1262 36.4859V11.5106H62.9788V36.4859H59.1262Z"
+        fill="#1B2634"
+      />
+      <path
+        d="M71.9155 27.7495V14.6976H67.4984V11.5117H69.6563C71.4027 11.5117 71.8649 10.9976 72.1223 9.04468L72.7386 3.5976H75.7186V11.5117H81.9339V14.6976H75.7186V27.7505C75.7186 31.8622 77.1051 33.5576 80.1357 33.5576C80.8037 33.5576 81.3683 33.5059 81.9339 33.4035V36.5894C81.0601 36.8469 80.2392 37 79.1597 37C74.0735 37 71.9155 34.1223 71.9155 27.7495Z"
+        fill="#1B2634"
+      />
+      <path
+        d="M85.4773 23.9977C85.4773 16.5977 90.5624 10.9965 97.9089 10.9965C105.254 10.9965 110.341 16.6495 110.341 23.8954C110.341 24.1529 110.341 24.5636 110.289 24.8201H89.3816C89.484 29.9589 93.1319 33.7613 98.2687 33.7613C102.327 33.7613 104.998 31.7577 106.282 28.9307L109.723 29.5472C108.131 33.7613 104.072 36.9989 98.2677 36.9989C90.1519 37 85.4773 31.0906 85.4773 23.9977ZM89.3816 22.2517H106.384C105.974 17.627 102.48 14.1835 97.9089 14.1835C93.3366 14.1835 89.7921 17.6259 89.3816 22.2517Z"
+        fill="#1B2634"
+      />
+      <path
+        d="M116.402 36.4859V11.5106H120.049V17.2153C121.435 13.4129 124.467 10.9976 128.422 10.9976C129.192 10.9976 129.963 11.1517 130.272 11.3576V14.9541C129.707 14.8 128.833 14.6976 128.115 14.6976C123.594 14.6976 120.255 18.5 120.255 23.6906V36.4859H116.402Z"
+        fill="#1B2634"
+      />
+      <path
+        d="M134.381 2.56942C134.381 1.18231 135.409 0.154123 136.847 0.154123C138.233 0.154123 139.261 1.18231 139.261 2.56942C139.261 3.95652 138.233 4.98471 136.847 4.98471C135.409 4.98471 134.381 3.95652 134.381 2.56942ZM134.895 36.4859V11.5106H138.747V36.4859H134.895Z"
+        fill="#1B2634"
+      />
+      <path
+        d="M145.117 29.9082C145.117 26.7223 147.274 24.1012 151.538 23.3813L158.781 22.1483C162.069 21.5835 163.199 20.607 163.199 19.2706C163.199 16.5471 160.63 14.2352 156.418 14.2352C152.36 14.2352 149.843 16.4964 149.175 20.0423L145.836 19.4775C146.555 14.1328 150.459 10.9987 156.418 10.9987C162.634 10.9987 167 14.4928 167 19.6834V36.488H163.404V30.7823C161.76 34.5847 158.267 37 153.9 37C148.609 37 145.117 34.1223 145.117 29.9082ZM163.404 24.667V22.7658C162.941 23.4847 161.709 24.2047 159.243 24.667L153.182 25.7976C150.357 26.3117 149.021 27.8023 149.021 29.7552C149.021 32.3763 151.435 33.9693 154.62 33.9693C159.449 33.9682 163.404 29.8565 163.404 24.667Z"
+        fill="#1B2634"
+      />
+      <path
+        d="M13.1764 4.63212C14.7613 4.03041 16.4961 3.69894 18.3386 3.69894C24.5032 3.69894 29.486 7.29655 31.2841 13.7201L34.7252 12.6919C32.8764 4.83059 26.6601 0 18.3386 0C15.7913 0 13.4149 0.472925 11.2686 1.32799L13.1764 4.63212Z"
+        fill="#1B2634"
+      />
+      <path
+        d="M18.3386 33.3C16.5141 33.3 14.7941 32.9759 13.2218 32.3858L11.315 35.69C13.4487 36.5334 15.8092 37 18.3386 37C26.6601 37 32.8765 32.1694 34.7252 24.307L31.2841 23.2789C29.486 29.7024 24.5032 33.3 18.3386 33.3Z"
+        fill="#1B2634"
+      />
+      <path
+        d="M9.79988 30.5111C6.1984 27.8234 3.95604 23.4457 3.95604 18.5001C3.95604 13.5724 6.18151 9.20838 9.75978 6.51862L7.82133 3.16064C2.99262 6.46584 0 12.0639 0 18.5011C0 24.9563 3.0095 30.5681 7.86143 33.8701L9.79988 30.5111Z"
+        fill="#1471A0"
+      />
+</svg><svg role="img" aria-label="Criteria" class="logo es" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 167 37" fill="none">
+<path
+        d="M40.6334 36.4859V11.5106H44.2803V17.2153C45.6668 13.4129 48.6985 10.9976 52.6535 10.9976C53.4238 10.9976 54.1941 11.1517 54.5033 11.3576V14.9541C53.9377 14.8 53.065 14.6976 52.3454 14.6976C47.8248 14.6976 44.486 18.5 44.486 23.6906V36.4859H40.6334Z"
+        fill="#FFFFFF"
+      />
+      <path
+        d="M58.6123 2.56942C58.6123 1.18231 59.6401 0.154123 61.0784 0.154123C62.4649 0.154123 63.4927 1.18231 63.4927 2.56942C63.4927 3.95652 62.4649 4.98471 61.0784 4.98471C59.639 4.98471 58.6123 3.95652 58.6123 2.56942ZM59.1262 36.4859V11.5106H62.9788V36.4859H59.1262Z"
+        fill="#FFFFFF"
+      />
+      <path
+        d="M71.9155 27.7495V14.6976H67.4984V11.5117H69.6563C71.4027 11.5117 71.8649 10.9976 72.1223 9.04468L72.7386 3.5976H75.7186V11.5117H81.9339V14.6976H75.7186V27.7505C75.7186 31.8622 77.1051 33.5576 80.1357 33.5576C80.8037 33.5576 81.3683 33.5059 81.9339 33.4035V36.5894C81.0601 36.8469 80.2392 37 79.1597 37C74.0735 37 71.9155 34.1223 71.9155 27.7495Z"
+        fill="#FFFFFF"
+      />
+      <path
+        d="M85.4773 23.9977C85.4773 16.5977 90.5624 10.9965 97.9089 10.9965C105.254 10.9965 110.341 16.6495 110.341 23.8954C110.341 24.1529 110.341 24.5636 110.289 24.8201H89.3816C89.484 29.9589 93.1319 33.7613 98.2687 33.7613C102.327 33.7613 104.998 31.7577 106.282 28.9307L109.723 29.5472C108.131 33.7613 104.072 36.9989 98.2677 36.9989C90.1519 37 85.4773 31.0906 85.4773 23.9977ZM89.3816 22.2517H106.384C105.974 17.627 102.48 14.1835 97.9089 14.1835C93.3366 14.1835 89.7921 17.6259 89.3816 22.2517Z"
+        fill="#FFFFFF"
+      />
+      <path
+        d="M116.402 36.4859V11.5106H120.049V17.2153C121.435 13.4129 124.467 10.9976 128.422 10.9976C129.192 10.9976 129.963 11.1517 130.272 11.3576V14.9541C129.707 14.8 128.833 14.6976 128.115 14.6976C123.594 14.6976 120.255 18.5 120.255 23.6906V36.4859H116.402Z"
+        fill="#FFFFFF"
+      />
+      <path
+        d="M134.381 2.56942C134.381 1.18231 135.409 0.154123 136.847 0.154123C138.233 0.154123 139.261 1.18231 139.261 2.56942C139.261 3.95652 138.233 4.98471 136.847 4.98471C135.409 4.98471 134.381 3.95652 134.381 2.56942ZM134.895 36.4859V11.5106H138.747V36.4859H134.895Z"
+        fill="#FFFFFF"
+      />
+      <path
+        d="M145.117 29.9082C145.117 26.7223 147.274 24.1012 151.538 23.3813L158.781 22.1483C162.069 21.5835 163.199 20.607 163.199 19.2706C163.199 16.5471 160.63 14.2352 156.418 14.2352C152.36 14.2352 149.843 16.4964 149.175 20.0423L145.836 19.4775C146.555 14.1328 150.459 10.9987 156.418 10.9987C162.634 10.9987 167 14.4928 167 19.6834V36.488H163.404V30.7823C161.76 34.5847 158.267 37 153.9 37C148.609 37 145.117 34.1223 145.117 29.9082ZM163.404 24.667V22.7658C162.941 23.4847 161.709 24.2047 159.243 24.667L153.182 25.7976C150.357 26.3117 149.021 27.8023 149.021 29.7552C149.021 32.3763 151.435 33.9693 154.62 33.9693C159.449 33.9682 163.404 29.8565 163.404 24.667Z"
+        fill="#FFFFFF"
+      />
+      <path
+        d="M13.1764 4.63212C14.7613 4.03041 16.4961 3.69894 18.3386 3.69894C24.5032 3.69894 29.486 7.29655 31.2841 13.7201L34.7252 12.6919C32.8764 4.83059 26.6601 0 18.3386 0C15.7913 0 13.4149 0.472925 11.2686 1.32799L13.1764 4.63212Z"
+        fill="#FFFFFF"
+      />
+      <path
+        d="M18.3386 33.3C16.5141 33.3 14.7941 32.9759 13.2218 32.3858L11.315 35.69C13.4487 36.5334 15.8092 37 18.3386 37C26.6601 37 32.8765 32.1694 34.7252 24.307L31.2841 23.2789C29.486 29.7024 24.5032 33.3 18.3386 33.3Z"
+        fill="#FFFFFF"
+      />
+      <path
+        d="M9.79988 30.5111C6.1984 27.8234 3.95604 23.4457 3.95604 18.5001C3.95604 13.5724 6.18151 9.20838 9.75978 6.51862L7.82133 3.16064C2.99262 6.46584 0 12.0639 0 18.5011C0 24.9563 3.0095 30.5681 7.86143 33.8701L9.79988 30.5111Z"
+        fill="#FFFFFF"
+      />
+</svg>
+    <div class="t">Portal do Assessor</div>
+    <div class="s">Entre com o login e a senha que a Mesa Operacional enviou para você.</div>
+    <div class="f"><label for="tlLogin">Login</label><input id="tlLogin" autocomplete="username" autocapitalize="none" spellcheck="false"></div>
+    <div class="f"><label for="tlSenha">Senha</label><input type="password" id="tlSenha" autocomplete="current-password" placeholder="XXXX-XXXX-XXXX-XXXX"></div>
+    <button class="btn" id="tlBtn">Entrar</button>
+    <button class="lnk" id="tlEsqueci">Esqueci a senha</button>
+    <div class="msg" id="tlMsg" role="status"></div>
+    <div class="foot">Os dados ficam trancados com criptografia AES-256 e só abrem com a sua senha, neste navegador. Uso interno: não compartilhe a senha nem o acesso. Abra no Google Chrome ou no Edge.</div>
+  </div>
+  <script>
+  (function(){
+    // Sem let/const/function no escopo global: depois do document.write o portal declara os próprios nomes globais.
+    var te = new TextEncoder(), erros = 0, esperaAte = 0, MARCA = '/*__PACOTES__*/[]';
+    var $ = function(id){ return document.getElementById(id); };
+    var msg = function(t, erro){ $('tlMsg').textContent = t || ''; $('tlMsg').className = 'msg' + (erro ? ' err' : ''); };
+    var unb64 = function(s){ var b = atob(s), u = new Uint8Array(b.length); for (var i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return u; };
+    var hex = function(u){ return Array.from(u, function(x){ return (x < 16 ? '0' : '') + x.toString(16); }).join(''); };
+    if (!window.crypto || !crypto.subtle || !window.DecompressionStream){ msg('Este navegador não abre o portal. Use o Google Chrome ou o Edge atualizados.', true); $('tlBtn').disabled = true; return; }
+    async function decifrar(chave, blob, rotulo){
+      var k = await crypto.subtle.importKey('raw', chave, 'AES-GCM', false, ['decrypt']);
+      return new Uint8Array(await crypto.subtle.decrypt({name:'AES-GCM', iv:blob.subarray(0, 12), additionalData:te.encode(rotulo)}, k, blob.subarray(12)));
+    }
+    async function gunzipTexto(u){ return await new Response(new Blob([u]).stream().pipeThrough(new DecompressionStream('gzip'))).text(); }
+    async function baixar(caminho, tipo){ var r = await fetch(caminho, {cache:'no-store'}); if (!r.ok) throw new Error('nao-achou'); return tipo === 'json' ? r.json() : tipo === 'texto' ? r.text() : new Uint8Array(await r.arrayBuffer()); }
+    async function abrir(){
+      if (Date.now() < esperaAte) return msg('Muitas tentativas. Aguarde ' + Math.ceil((esperaAte - Date.now()) / 1000) + ' segundos.', true);
+      var login = $('tlLogin').value.trim().toLowerCase(), senha = $('tlSenha').value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+      if (!login || !senha) return msg('Preencha o login e a senha.', true);
+      $('tlBtn').disabled = true; msg('Conferindo a senha...');
+      var chaveiro = null;
+      try {
+        var id = hex(new Uint8Array(await crypto.subtle.digest('SHA-256', te.encode('portal-criteria|' + login)))).slice(0, 32), cam = 'k/' + id + '.json';
+        var K = await baixar(cam, 'json');
+        var base = await crypto.subtle.importKey('raw', te.encode(senha), 'PBKDF2', false, ['deriveBits']);
+        var kek = new Uint8Array(await crypto.subtle.deriveBits({name:'PBKDF2', salt:unb64(K.sal), iterations:K.iter, hash:'SHA-256'}, base, 256));
+        chaveiro = JSON.parse(new TextDecoder().decode(await decifrar(kek, unb64(K.dados), cam)));
+      } catch (e) { chaveiro = null; }
+      if (!chaveiro){
+        $('tlBtn').disabled = false; erros++; $('tlSenha').value = '';
+        if (erros >= 5){ erros = 0; esperaAte = Date.now() + 30000; return msg('Login ou senha incorretos. Tente de novo em 30 segundos.', true); }
+        return msg('Login ou senha incorretos.', true);
+      }
+      try {
+        msg('Abrindo os dados de ' + chaveiro.assessores.length + (chaveiro.assessores.length === 1 ? ' assessor...' : ' assessores...'));
+        var pacotes = await Promise.all(chaveiro.assessores.map(async function(x){
+          return JSON.parse(await gunzipTexto(await decifrar(unb64(x.k), await baixar(x.a), x.a)));
+        }));
+        var modelo = await baixar('portal.html', 'texto');
+        if (modelo.indexOf(MARCA) < 0) throw new Error('modelo');
+        // pacotes + quem entrou (nome do chaveiro), que o portal mostra no canto do menu
+        var js = (JSON.stringify(pacotes) + ';window.PORTAL_PESSOA=' + JSON.stringify({nome: chaveiro.nome || ''})).replace(/</g, '\\u003c');
+        document.open(); document.write(modelo.replace(MARCA, function(){ return js; })); document.close();
+      } catch (e) {
+        $('tlBtn').disabled = false;
+        msg('A senha está certa, mas os dados não abriram (publicação em andamento?). Recarregue a página em 1 minuto. Se continuar, avise a Mesa Operacional.', true);
+      }
+    }
+    $('tlBtn').onclick = abrir;
+    $('tlLogin').onkeydown = function(e){ if (e.key === 'Enter') $('tlSenha').focus(); };
+    $('tlSenha').onkeydown = function(e){ if (e.key === 'Enter') abrir(); };
+    $('tlEsqueci').onclick = function(){ msg('Peça uma senha nova à Mesa Operacional. A senha antiga para de funcionar na próxima atualização.'); };
+    setTimeout(function(){ $('tlLogin').focus(); }, 50);
+  })();
+  </script>
+</body>
+</html>
